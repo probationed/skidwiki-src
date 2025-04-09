@@ -246,16 +246,71 @@
       </ul>
     </div>
 
+<div class="text-center mt-12">
+  <button id="downloadArchive" class="inline-block bg-gray-600 hover:bg-gray-500 text-white font-mono text-sm px-6 py-2 rounded shadow transition duration-200">
+    Submit Archive
+  </button>
+</div>
+
+<div id="notification" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1a1a1a] border border-red-600 text-white px-6 py-3 rounded shadow-lg text-sm font-mono z-50">
+  ✅ Provide the downloaded .html file to <strong>t.me/horrorized</strong> to publish your archive.
+</div>
+
     <div class="text-center mt-8">
-      <p class="text-sm text-gray-500">Credits to 7kz for inspiration and contribution to this project.</p>
+      <p class="text-sm text-gray-500">skid.wiki</p>
     </div>
   </div>
 
   <script>
+    document.getElementById('downloadArchive').addEventListener('click', function () {
+    const savedPastes = JSON.parse(localStorage.getItem('pastes')) || [];
+
+    let htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Skid Wiki Archive</title>
+  <style>
+    body { background: #0e0e0e; color: #cfcfcf; font-family: monospace; padding: 2rem; }
+    .paste { background: #1a1a1a; border: 1px solid #333; margin-bottom: 1.5rem; padding: 1rem; border-radius: 6px; }
+    .title { font-weight: bold; font-size: 1.1rem; color: #f87171; }
+    .desc { font-size: 0.9rem; color: #999; margin-bottom: 0.5rem; }
+    .content { white-space: pre-wrap; color: #ddd; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1 style="color: #f87171;">Skid Wiki Paste Archive</h1>
+`;
+
+    savedPastes.forEach(paste => {
+      htmlContent += `
+  <div class="paste">
+    <div class="title">${paste.title}</div>
+    <div class="desc">${paste.description}</div>
+    <div class="content">${paste.content}</div>
+  </div>
+      `;
+    });
+
+    htmlContent += `
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'skidwiki_archive.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    const notif = document.getElementById('notification');
+    notif.classList.remove('hidden');
+    setTimeout(() => notif.classList.add('hidden'), 6000);
+  });
+  
     const form = document.getElementById('pasteForm');
     const pasteList = document.getElementById('pasteList');
-
-    // Load pastes from localStorage on page load
     document.addEventListener('DOMContentLoaded', function () {
       const savedPastes = JSON.parse(localStorage.getItem('pastes')) || [];
       savedPastes.forEach(function (paste) {
@@ -271,8 +326,6 @@
       const content = document.getElementById('pasteContent').value;
 
       const newPaste = { title, description, content };
-
-      // Save new paste to localStorage
       const savedPastes = JSON.parse(localStorage.getItem('pastes')) || [];
       savedPastes.push(newPaste);
       localStorage.setItem('pastes', JSON.stringify(savedPastes));
@@ -306,4 +359,3 @@
 </body>
 
 </html>
-
